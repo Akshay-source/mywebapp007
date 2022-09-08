@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mywebapp</title>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script> -->
+    <link rel="stylesheet" href="/style.e308ff8e.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="/style.e308ff8e.js"></script></head> -->
+
+<body>
+    <h1><span>EXPENSE TRACKER</span></h1>
+    <!-- <button id="addbtn">Add Expense</button>
+    <button id="viewbtn">View Expense</button> -->
+    <div>
+        <table>
+            <tr>
+                <td>
+                    <fieldset style="margin: 50px;width: 1800px;height: 600px;margin-left: 32px;">
+                        <button id="addbtn">Add Expense</button>
+                        <button id="viewbtn">View Expense</button>
+                    </fieldset>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- The Modal -->
+    <div id="firstModal" class="modal">
+
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3><b>ADDING EXPENSE</b></h3>
+            <h3>FILL THE DETAILS</h3>
+            <!-- <form action="/action_page.php"> -->
+            <label>DATE:</label> <input id="date" type="date"><br><br>
+            <label>AMOUNT:</label> <input id="amount" type="text"><br><br>
+            <label>DESCRIPTION:</label><input id="desc" type="text"><br><br>
+            <label>ATTACHMENT:</label><input id="file-input" type="file"><br>
+            <!-- <button id="upload">ATTACHMENTS</button>
+            <input type="file" id="file-input" multiple style="display: none;" /> -->
+            <!-- <button id="upload">UPLOAD</button> -->
+            <button id="insbtn">SUBMIT</button>
+            <!-- <button id="clr">CLEAR</button> -->
+            <!-- </form> -->
+        </div>
+
+    </div>
+
+    <div id="secondModal" class="modal-1">
+
+        <!-- Modal content -->
+        <div class="modal-content-1">
+            <span class="close-1">&times;</span>
+            <h3><b>List of expenses</b></h3>
+            <label><b>START DATE:</b></label> <input style="margin-left:10px" id="strtdate" type="date">
+            <label><b>END DATE:</b></label> <input style="margin-left:10px" id="enddate" type="date">
+            <button id="fltr">FILTER</button>
+            <table class="center">
+                <thead>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                </thead>
+                <tbody id="tbody1"></tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.9.4/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzkgp1TY8OY2MVfIPa4AKR-eL2ULj4gFc",
+            authDomain: "webapp-backend-b1c8b.firebaseapp.com",
+            projectId: "webapp-backend-b1c8b",
+            storageBucket: "webapp-backend-b1c8b.appspot.com",
+            messagingSenderId: "1040001057243",
+            appId: "1:1040001057243:web:eb2e0ec3765092846da7fe"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+
+        import { getDatabase, set, get, update, remove, ref, child, onValue, query, orderByChild, startAt, endAt }
+            from "https://www.gstatic.com/firebasejs/9.9.4/firebase-database.js";
+
+
+        const db = getDatabase();
+
+        var date = document.getElementById("date");
+        var amount = document.getElementById("amount");
+        var desc = document.getElementById("desc");
+        var submit = document.getElementById("insbtn");
+
+        function InsertData() {                     //---------inserting data-------
+            set(ref(db, "expenses/" + date.value), {
+                date: date.value,
+                amount: amount.value,
+                desc: desc.value
+            })
+                .then(() => {
+                    alert("data added successfully")
+                })
+                .catch((error) => {
+                    alert(error)
+                })
+        }
+
+        submit.addEventListener('click', InsertData);
+
+
+        // -------Filling the table----------
+        var tbody = document.getElementById("tbody1")
+        function AddItemToTable(date, amount, desc) {
+            let trow = document.createElement("tr");
+            let td1 = document.createElement("td");
+            let td2 = document.createElement("td");
+            let td3 = document.createElement("td");
+
+            td1.innerHTML = date;
+            td2.innerHTML = amount;
+            td3.innerHTML = desc;
+
+            trow.appendChild(td1);
+            trow.appendChild(td2);
+            trow.appendChild(td3);
+
+            tbody.appendChild(trow);
+
+        }
+
+        //Adding all items to the table
+
+        function AddAllItemsToTable(arr) {
+            tbody.innerHTML = "";
+            arr.forEach(element => {
+                AddItemToTable(element.date, element.amount, element.desc)
+
+            });
+        }
+
+        var start = document.getElementById("strtdate");
+        var end = document.getElementById("enddate");
+        var filter = document.getElementById("fltr");
+
+        function GetAllDataOnce() {
+            // var start = document.getElementById("strtdate");
+            // var end = document.getElementById("enddate");
+            // var filter = document.getElementById("fltr");
+
+            const que = query(ref(db, "expenses"), orderByChild('date'), startAt(start.value), endAt(end.value))
+            // const dbRef = ref(db);
+
+            get(que)
+                .then((snapshot) => {
+
+                    var arr1 = [];
+
+                    snapshot.forEach(childSnapshot => {
+                        arr1.push(childSnapshot.val());
+                    });
+                    AddAllItemsToTable(arr1);
+                })
+        }
+
+        filter.addEventListener('click', GetAllDataOnce)
+
+        function GetAllDataRealTime() {
+            const dbRef = ref(db, "expenses");
+
+            onValue(dbRef, (snapshot) => {
+
+                var arr1 = [];
+
+                snapshot.forEach(childSnapshot => {
+                    arr1.push(childSnapshot.val());
+                });
+                AddAllItemsToTable(arr1);
+
+            })
+
+
+        }
+
+        window.onload = GetAllDataRealTime;
+
+
+        //--------- blob storage part---------
+
+        // import 'regenerator-runtime/runtime'
+        // const { BlobServiceClient } = require('@azure/storage-blob');
+
+        // // const attachment = document.getElementById('upload');
+        // const fileInput = document.getElementById('file-input');
+
+        // const blobSasUrl = 'https://demostorage25.blob.core.windows.net/?sv=2021-06-08&ss=b&srt=co&sp=rwdlaciytf&se=2022-09-06T04:17:09Z&st=2022-09-05T20:17:09Z&spr=https&sig=jdinEfaFWbMEQf3EN4wMGpYK1rnPNlGNZOC3X%2BKj6k8%3D';
+        // const blobServiceClient = new BlobServiceClient(blobSasUrl);
+
+        // const containerName = 'demo';
+        // const containerClient = blobServiceClient.getContainerClient(containerName);
+
+        // const uploadFiles = async () => {
+
+        //     try {
+        //         const promises = [];
+        //         for (const file of fileInput.files) {
+        //             const blockBlobClient = containerClient.getBlockBlobClient(file.name);
+        //             promises.push(blockBlobClient.uploadBrowserData(file));
+        //         }
+        //         await Promise.all(promises);
+        //         alert('Done.');
+        //     }
+        //     catch (error) {
+        //         alert(error.message);
+        //     }
+        // }
+
+        // // attachement.addEventListener('click', () => fileInput.click());
+        // fileInput.addEventListener('change', uploadFiles);
+
+        
+
+
+    </script>
+
+
+    <script src="/myscript.a18071fa.js"></script>
+</body>
+
+</html>
