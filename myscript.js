@@ -74,33 +74,33 @@ window.onclick = function (event) {
 
 // import regenerator-runtime
 
-// const { BlobServiceClient } = require('@azure/storage-blob');
+const { BlobServiceClient } = require('@azure/storage-blob');
 
-// // const attachment = document.getElementById('upload');
-// const fileInput = document.getElementById('file-input');
+// const attachment = document.getElementById('upload');
+const fileInput = document.getElementById('file-input');
 
-// const blobSasUrl = 'https://demostorage25.blob.core.windows.net/?sv=2021-06-08&ss=b&srt=co&sp=rwdlaciytf&se=2022-09-08T08:02:35Z&st=2022-09-08T00:02:35Z&spr=https&sig=UOJbRG9E1rn%2F1jHh%2B8dPO0Ke%2FQxS6gvPy%2BTgvtshdgs%3D';
-// const blobServiceClient = new BlobServiceClient(blobSasUrl);
+const blobSasUrl = 'https://demostorage25.blob.core.windows.net/?sv=2021-06-08&ss=b&srt=co&sp=rwdlaciytf&se=2022-09-09T01:49:42Z&st=2022-09-08T17:49:42Z&spr=https&sig=fRlF3ub0SlvkJ6nVyZQu0%2FOCaELAKyvx1y5pF5WXySA%3D';
+const blobServiceClient = new BlobServiceClient(blobSasUrl);
 
-// const containerName = 'demo';
-// const containerClient = blobServiceClient.getContainerClient(containerName);
+const containerName = 'demo';
+const containerClient = blobServiceClient.getContainerClient(containerName);
 
-// const uploadFiles = async () => {
+const uploadFiles = async () => {
 
-//     try {
-//         const promises = [];
-//         for (const file of fileInput.files) {
-//             const blockBlobClient = containerClient.getBlockBlobClient(file.name);
-//             promises.push(blockBlobClient.uploadBrowserData(file));
-//             // console.log({...file,name:file.name+date.value.toString()});
-//         }
-//         await Promise.all(promises);
-//         alert('Uploaded to Blob Storage');
-//     }
-//     catch (error) {
-//         alert(error.message);
-//     }
-// }
+    try {
+        const promises = [];
+        for (const file of fileInput.files) {
+            const blockBlobClient = containerClient.getBlockBlobClient(file.name);
+            promises.push(blockBlobClient.uploadBrowserData(file));
+            // console.log({...file,name:file.name+date.value.toString()});
+        }
+        await Promise.all(promises);
+        alert('Uploaded to Blob Storage');
+    }
+    catch (error) {
+        alert(error.message);
+    }
+}
 
 // attachement.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', uploadFiles);
